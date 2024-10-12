@@ -9,10 +9,10 @@ const loadCategory = async () => {
     console.error(error);
   }
 };
-const loadVideos = async () => {
+const loadVideos = async (searchText = '') => {
   try {
     const res = await fetch(
-      "https://openapi.programming-hero.com/api/phero-tube/videos"
+      `https://openapi.programming-hero.com/api/phero-tube/videos?title=${searchText}`
     );
     const data = await res.json();
     dispayVideos(data.videos);
@@ -43,12 +43,51 @@ const loadCategoryVideos =async (id) =>{
 
 }
 
+const loadDetails = async (videoId)=>{
+    console.log(videoId);
+    try {
+        const res = await fetch(
+          `https://openapi.programming-hero.com/api/phero-tube/video/${videoId}`
+        );
+        const data = await res.json();
+        displayDetails(data.video);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const displayDetails = (video)=>{
+        console.log(video);
+        const detailContainer = document.getElementById('modal-content');
+        document.getElementById('customModal').showModal();
+
+
+        detailContainer.innerHTML = `
+        <img src= '${video.thumbnail}'/>
+        <p>${video.description}</p>
+        `
+    }
 
 
 
 const dispayVideos = (videos) => {
     const videoContainer = document.getElementById("videos");
     videoContainer.innerHTML ='';
+
+ 
+    if(videos.length == 0){
+        videoContainer.classList.remove('grid');
+
+        videoContainer.innerHTML = `
+        <div class='flex justify-center items-center gap-5 flex-col w-full min-h-[300px] border-red-700 border-2 text-center '>
+            <img src='design/icon.png'/>
+            <p class='font-bold text-3xl'>Oops!! Sorry, There is no content here</p>
+            </div>
+        `;
+    }else{
+        videoContainer.classList.add('grid');
+    }
+
     videos.forEach((video) => {
       console.log(video);
   
@@ -78,6 +117,9 @@ const dispayVideos = (videos) => {
                </div>
                  <p>${video.others.views ? video.others.views + " views" : ""}</p> 
             </div> 
+             <p> <button onclick="loadDetails('${video.video_id}')" class=" btn bg-error text-right">
+    details</p>
+
          </div>
       `;
       videoContainer.append(card);
@@ -99,5 +141,12 @@ const displayCategory = (categories) => {
   });
 };
 
+
+document.getElementById('search-input').addEventListener('keyup', (e) => {
+    loadVideos(e.target.value);
+})
+
 loadCategory();
 loadVideos();
+
+
